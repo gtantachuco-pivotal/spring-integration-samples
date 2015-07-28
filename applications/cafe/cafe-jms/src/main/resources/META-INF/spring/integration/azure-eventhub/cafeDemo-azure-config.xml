@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:task="http://www.springframework.org/schema/task"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd 
+    http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd
+	">
+
+	<!-- Set up the connection factory. You must name the bean "connectionFactory" for the JMS-backed
+	channels to automatically find it. Otherwise, you must specify the connection when you declare the
+	channel -->
+	
+	<bean id="jndiTemplate" class="org.springframework.jndi.JndiTemplate">
+		<property name="environment">
+			<props>
+			<prop key="java.naming.factory.initial">org.apache.qpid.amqp_1_0.jms.jndi.PropertiesFileInitialContextFactory</prop>
+			<prop key="java.naming.provider.url">eventhub.properties</prop>
+			</props>
+		</property>
+	</bean>	
+
+	<!-- 
+	  Settings for Producers 
+	-->
+	
+	<bean id="qpidProducerConnectionFactory" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiTemplate" ref ="jndiTemplate"/>
+		<property name="jndiName" value="EventHubProducerCF"/>
+	</bean>
+	
+	<bean id="producerConnectionFactory" class="org.springframework.jms.connection.CachingConnectionFactory">
+		<property name="targetConnectionFactory" ref="qpidProducerConnectionFactory"/>
+		<property name="sessionCacheSize" value="10"/>
+		<property name="cacheProducers" value="false"/>
+	</bean>
+	
+	<!-- 
+	  Settings for Consumers 
+	-->
+
+	<bean id="qpidConsumerConnectionFactory" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiTemplate" ref ="jndiTemplate"/>
+		<property name="jndiName" value="EventHubConsumerCF"/>
+	</bean>
+	
+	<bean id="consumerConnectionFactory" class="org.springframework.jms.connection.CachingConnectionFactory">
+		<property name="targetConnectionFactory" ref="qpidConsumerConnectionFactory"/>
+		<property name="sessionCacheSize" value="10"/>
+		<property name="cacheConsumers" value="true"/>
+	</bean>
+	
+<!-- EventHub Offset Manager -->	
+	
+	<bean id="metadataStore"
+    	class="org.springframework.integration.metadata.PropertiesPersistingMetadataStore">
+		<property name="baseDirectory" value="./" />
+    </bean>	
+    
+	<bean id="eventHubOffsetManager" class="org.springframework.integration.samples.cafe.azure.eventhub.EventHubOffsetManager">
+	    <property name="metadataStore"    ref="metadataStore" />
+	</bean>
+	
+<!-- Flush contents of MetadataStore every 2 minutes -->	
+
+	<task:scheduler id="metadataFlushScheduler"/>
+	
+	<task:scheduled-tasks scheduler="metadataFlushScheduler">
+	    <task:scheduled ref="eventHubOffsetManager" method="flushMetadata" fixed-delay="120000"/>
+	</task:scheduled-tasks>
+	
+</beans>

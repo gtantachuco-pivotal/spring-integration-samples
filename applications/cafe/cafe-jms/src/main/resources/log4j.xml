@@ -10,6 +10,14 @@
 		</layout>
 	</appender>
 
+	<appender name="util" class="org.apache.log4j.FileAppender">
+        <param name="File" value="Cafe_on_Azure.log" />
+        <param name="Append" value="false" />
+        <layout class="org.apache.log4j.PatternLayout">
+          <param name="ConversionPattern" value="%t %-5p %c{2} - %m%n"/>
+        </layout>           
+    </appender>
+     
 	<!-- Loggers -->
 	<logger name="org.springframework">
 		<level value="warn" />
@@ -20,9 +28,13 @@
 	</logger>
 
 	<logger name="org.springframework.integration">
-		<level value="info" />
+		<level value="debug" />
 	</logger>
 
+	<logger name="org.springframework.integration.transformer">
+		<level value="info" />
+	</logger>
+	
 	<logger name="org.springframework.integration.samples">
 		<level value="debug" />
 	</logger>
@@ -30,7 +42,7 @@
 	<!-- Root Logger -->
 	<root>
 		<priority value="warn" />
-		<appender-ref ref="console" />
+		<appender-ref ref="util" />
 	</root>
 
 </log4j:configuration>

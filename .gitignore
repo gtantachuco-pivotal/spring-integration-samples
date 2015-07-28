@@ -14,7 +14,8 @@ derby.log
 .idea
 activemq-data
 .settings/
-
+metadata-store.properties
+*.log
 
 /.gradle
 build/

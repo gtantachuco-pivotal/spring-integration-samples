@@ -113,6 +113,16 @@
       <artifactId>activemq-kahadb-store</artifactId>
       <version>5.9.0</version>
       <scope>compile</scope>
-    </dependency>
+    </dependency>    
+	<dependency>
+		<groupId>org.apache.qpid</groupId>
+		<artifactId>qpid-amqp-1-0-client-jms</artifactId>
+		<version>0.32</version>
+	</dependency>    
+	<dependency>
+		<groupId>org.springframework.integration</groupId>
+		<artifactId>spring-integration-core</artifactId>
+		<version>4.1.6.RELEASE</version>
+	</dependency>    
   </dependencies>
 </project>
